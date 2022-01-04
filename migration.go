@@ -26,6 +26,8 @@ func (mig MigRing) Apply(pops Populations, rng *rand.Rand) {
 	for i := 0; i < len(pops)-1; i++ {
 		for _, k := range randomInts(mig.NMigrants, 0, len(pops[i].Individuals), rng) {
 			pops[i].Individuals[k], pops[i+1].Individuals[k] = pops[i+1].Individuals[k], pops[i].Individuals[k]
+			pops[i].Individuals[k].Evaluated = false
+			pops[i+1].Individuals[k].Evaluated = false
 		}
 	}
 }
