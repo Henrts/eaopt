@@ -49,7 +49,7 @@ func (ga *GA) init(newGenome func(rng *rand.Rand) Genome) error {
 	for i := range ga.Populations {
 		ga.Populations[i] = newPopulation(ga.PopSize, ga.ParallelInit, newGenome, ga.RNG)
 		// Evaluate and sort
-		err := ga.Populations[i].Individuals.Evaluate(ga.ParallelEval)
+		err := ga.Populations[i].Individuals.Evaluate(ga.ParallelEval, i)
 		if err != nil {
 			return err
 		}
@@ -89,7 +89,7 @@ func (ga *GA) evolve() error {
 		ga.Migrator.Apply(ga.Populations, ga.RNG)
 	}
 
-	var f = func(pop *Population) error {
+	var f = func(pop *Population, populationIndex int) error {
 		var err error
 		// Apply speciation if a positive number of species has been specified
 		if ga.Speciator != nil {
@@ -99,13 +99,13 @@ func (ga *GA) evolve() error {
 			}
 		} else {
 			// Else apply the evolution model to the entire population
-			err = ga.Model.Apply(pop)
+			err = ga.Model.Apply(pop, populationIndex)
 			if err != nil {
 				return err
 			}
 		}
 		// Evaluate and sort
-		err = pop.Individuals.Evaluate(ga.ParallelEval)
+		err = pop.Individuals.Evaluate(ga.ParallelEval, populationIndex)
 		if err != nil {
 			return err
 		}
@@ -163,7 +163,7 @@ func (ga *GA) Minimize(newGenome func(rng *rand.Rand) Genome) error {
 
 func (pop *Population) speciateEvolveMerge(spec Speciator, model Model) error {
 	var (
-		species, err = spec.Apply(pop.Individuals, pop.RNG)
+		species, err = spec.Apply(pop.Individuals, pop.RNG, 0)
 		pops         = make([]Population, len(species))
 	)
 	if err != nil {
@@ -179,7 +179,7 @@ func (pop *Population) speciateEvolveMerge(spec Speciator, model Model) error {
 			ID:          randString(len(pop.ID), pop.RNG),
 			RNG:         pop.RNG,
 		}
-		err = model.Apply(&pops[i])
+		err = model.Apply(&pops[i], 0)
 		if err != nil {
 			return err
 		}

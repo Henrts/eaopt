@@ -8,7 +8,7 @@ import (
 
 type Vector []float64
 
-func (xi Vector) Evaluate() (float64, error) {
+func (xi Vector) Evaluate(PopulationIndex int) (float64, error) {
 	var sum float64
 	for _, x := range xi {
 		sum += x
@@ -36,10 +36,10 @@ func NewVector(rng *rand.Rand) Genome {
 
 type ErrorGenome struct{}
 
-func (eg ErrorGenome) Evaluate() (float64, error)         { return 0, errors.New("") }
-func (eg ErrorGenome) Mutate(rng *rand.Rand)              {}
-func (eg ErrorGenome) Crossover(y Genome, rng *rand.Rand) {}
-func (eg ErrorGenome) Clone() Genome                      { return ErrorGenome{} }
+func (eg ErrorGenome) Evaluate(popIndex int) (float64, error) { return 0, errors.New("") }
+func (eg ErrorGenome) Mutate(rng *rand.Rand)                  {}
+func (eg ErrorGenome) Crossover(y Genome, rng *rand.Rand)     {}
+func (eg ErrorGenome) Clone() Genome                          { return ErrorGenome{} }
 
 func NewErrorGenome(rng *rand.Rand) Genome { return ErrorGenome{} }
 
@@ -56,36 +56,36 @@ func l1Distance(x1, x2 Individual) (d float64) {
 
 type ModIdentity struct{}
 
-func (mod ModIdentity) Apply(pop *Population) error { return nil }
-func (mod ModIdentity) Validate() error             { return nil }
+func (mod ModIdentity) Apply(pop *Population, populationIndex int) error { return nil }
+func (mod ModIdentity) Validate() error                                  { return nil }
 
 type ModRuntimeError struct{}
 
-func (mod ModRuntimeError) Apply(pop *Population) error { return errors.New("") }
-func (mod ModRuntimeError) Validate() error             { return nil }
+func (mod ModRuntimeError) Apply(pop *Population, populationIndex int) error { return errors.New("") }
+func (mod ModRuntimeError) Validate() error                                  { return nil }
 
 type ModValidateError struct{}
 
-func (mod ModValidateError) Apply(pop *Population) error { return errors.New("") }
-func (mod ModValidateError) Validate() error             { return errors.New("") }
+func (mod ModValidateError) Apply(pop *Population, populationIndex int) error { return errors.New("") }
+func (mod ModValidateError) Validate() error                                  { return errors.New("") }
 
 type SpecRuntimeError struct{}
 
-func (spec SpecRuntimeError) Apply(indis Individuals, rng *rand.Rand) ([]Individuals, error) {
+func (spec SpecRuntimeError) Apply(indis Individuals, rng *rand.Rand, populationIndex int) ([]Individuals, error) {
 	return []Individuals{indis}, errors.New("")
 }
 func (spec SpecRuntimeError) Validate() error { return nil }
 
 type SpecValidateError struct{}
 
-func (spec SpecValidateError) Apply(indis Individuals, rng *rand.Rand) ([]Individuals, error) {
+func (spec SpecValidateError) Apply(indis Individuals, rng *rand.Rand, populationIndex int) ([]Individuals, error) {
 	return []Individuals{indis}, errors.New("")
 }
 func (spec SpecValidateError) Validate() error { return errors.New("") }
 
 type RuntimeErrorGenome struct{ Vector }
 
-func (spec RuntimeErrorGenome) Evaluate() (float64, error) {
+func (spec RuntimeErrorGenome) Evaluate(popIndex int) (float64, error) {
 	return 0, errors.New("error")
 }
 

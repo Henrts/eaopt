@@ -6,7 +6,7 @@ import "math/rand"
 // can be evolved as long as it can be evaluated, mutated, crossedover, and
 // cloned then it can.
 type Genome interface {
-	Evaluate() (float64, error)
+	Evaluate(populationIndex int) (float64, error)
 	Mutate(rng *rand.Rand)
 	Crossover(genome Genome, rng *rand.Rand)
 	Clone() Genome

@@ -59,7 +59,7 @@ func TestEvaluateIndividual(t *testing.T) {
 	if indi.Evaluated {
 		t.Error("Individual shouldn't have Evaluated set to True")
 	}
-	if indi.Evaluate() != nil {
+	if indi.Evaluate(0) != nil {
 		t.Error("No error should have been raised")
 	}
 	if !indi.Evaluated {
@@ -73,7 +73,7 @@ func TestEvaluateIndividualWithError(t *testing.T) {
 		genome = NewRuntimeErrorGenome(rng)
 		indi   = NewIndividual(genome, rng)
 	)
-	if indi.Evaluate() == nil {
+	if indi.Evaluate(0) == nil {
 		t.Error("An error should have been raised")
 	}
 	if indi.Evaluated {
@@ -87,7 +87,7 @@ func TestMutateIndividual(t *testing.T) {
 		genome = NewVector(rng)
 		indi   = NewIndividual(genome, rng)
 	)
-	indi.Evaluate()
+	indi.Evaluate(0)
 	indi.Mutate(rng)
 	if indi.Evaluated {
 		t.Error("Individual shouldn't have Evaluated set to True")

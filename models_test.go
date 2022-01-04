@@ -142,7 +142,7 @@ func TestGenerateOffsprings(t *testing.T) {
 		indis = newIndividuals(20, false, NewVector, rng)
 	)
 	for _, n := range []uint{0, 1, 3, 10} {
-		var offsprings, _ = generateOffsprings(n, indis, SelTournament{1}, 1.0, rng)
+		var offsprings, _ = generateOffsprings(n, indis, SelTournament{1}, 1.0, rng, 0)
 		if len(offsprings) != int(n) {
 			t.Error("GenerateOffsprings didn't produce the expected number of offsprings")
 		}
@@ -175,7 +175,7 @@ func TestModelsConstantSize(t *testing.T) {
 			var pop = newPopulation(n, false, NewVector, rng)
 			// Check the size of the population doesn't change for a few iterations
 			for i := 0; i < 5; i++ {
-				model.Apply(&pop)
+				model.Apply(&pop, 0)
 				if len(pop.Individuals) != int(n) {
 					t.Error("A model application changed the population size")
 				}

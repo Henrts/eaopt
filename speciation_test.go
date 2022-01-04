@@ -55,7 +55,7 @@ func TestSpecKMedoidsApply(t *testing.T) {
 	)
 	for i, tc := range testCases {
 		t.Run(fmt.Sprintf("TC %d", i), func(t *testing.T) {
-			var species, err = tc.kmeds.Apply(tc.indis, rng)
+			var species, err = tc.kmeds.Apply(tc.indis, rng, 0)
 			// Check the number of species is correct
 			if err == nil && len(species) != int(tc.kmeds.K) {
 				t.Error("Wrong number of species")
@@ -114,7 +114,7 @@ func TestSpecFitnessIntervalApply(t *testing.T) {
 				m          = minInt(int(float64(nbi/nbs)), int(nbi))
 				indis      = newIndividuals(nbi, false, NewVector, rng)
 				spec       = SpecFitnessInterval{K: nbs}
-				species, _ = spec.Apply(indis, rng)
+				species, _ = spec.Apply(indis, rng, 0)
 			)
 			// Check the cluster sizes are equal to min(n-i, m) where i is a
 			// multiple of m

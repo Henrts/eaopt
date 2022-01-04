@@ -13,7 +13,7 @@ func TestPopLog(t *testing.T) {
 		b      bytes.Buffer
 		logger = log.New(&b, "", 0)
 	)
-	pop.Individuals.Evaluate(false)
+	pop.Individuals.Evaluate(false, 0)
 	pop.Log(logger)
 	var expected = "pop_id=KVm min=-21.342844 max=18.440761 avg=-1.404246 std=11.739691\n"
 	if s := b.String(); s != expected {

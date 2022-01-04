@@ -10,7 +10,7 @@ import (
 // Selector chooses a subset of size n from a group of individuals. The group of
 // individuals a Selector is applied to is expected to be sorted.
 type Selector interface {
-	Apply(n uint, indis Individuals, rng *rand.Rand) (selected Individuals, indexes []int, err error)
+	Apply(n uint, indis Individuals, rng *rand.Rand, populationIndex int) (selected Individuals, indexes []int, err error)
 	Validate() error
 }
 
@@ -18,7 +18,7 @@ type Selector interface {
 type SelElitism struct{}
 
 // Apply SelElitism.
-func (sel SelElitism) Apply(n uint, indis Individuals, rng *rand.Rand) (Individuals, []int, error) {
+func (sel SelElitism) Apply(n uint, indis Individuals, rng *rand.Rand, populationIndex int) (Individuals, []int, error) {
 	indis.SortByFitness()
 	return indis[:n].Clone(rng), newInts(n), nil
 }
@@ -37,7 +37,7 @@ type SelTournament struct {
 }
 
 // Apply SelTournament.
-func (sel SelTournament) Apply(n uint, indis Individuals, rng *rand.Rand) (Individuals, []int, error) {
+func (sel SelTournament) Apply(n uint, indis Individuals, rng *rand.Rand, populationIndex int) (Individuals, []int, error) {
 	// Check that the number of individuals is large enough
 	if uint(len(indis))-n < sel.NContestants-1 || len(indis) < int(n) {
 		return nil, nil, fmt.Errorf("not enough individuals to select %d "+
@@ -57,13 +57,13 @@ func (sel SelTournament) Apply(n uint, indis Individuals, rng *rand.Rand) (Indiv
 		)
 		// Find the best contestant
 		winners[i] = indis[contestants[0]]
-		err := winners[i].Evaluate()
+		err := winners[i].Evaluate(populationIndex)
 		if err != nil {
 			return nil, nil, err
 		}
 		winnerIdx = idxs[0]
 		for j, idx := range contestants {
-			if indis[idx].GetFitness() < winners[i].Fitness {
+			if indis[idx].GetFitness(populationIndex) < winners[i].Fitness {
 				winners[i] = indis[idx]
 				indexes[i] = idx
 				winnerIdx = idxs[j]
@@ -99,7 +99,7 @@ func buildWheel(fitnesses []float64) []float64 {
 }
 
 // Apply SelRoulette.
-func (sel SelRoulette) Apply(n uint, indis Individuals, rng *rand.Rand) (Individuals, []int, error) {
+func (sel SelRoulette) Apply(n uint, indis Individuals, rng *rand.Rand, populationIndex int) (Individuals, []int, error) {
 	var (
 		selected = make(Individuals, n)
 		indexes  = make([]int, n)

@@ -78,7 +78,7 @@ func TestEvaluateIndividuals(t *testing.T) {
 			t.Error("Individual shouldn't have Evaluated set to True")
 		}
 	}
-	indis.Evaluate(false)
+	indis.Evaluate(false, 0)
 	for _, indi := range indis {
 		if !indi.Evaluated {
 			t.Error("Individual should have Evaluated set to True")
@@ -93,7 +93,7 @@ func TestEvaluateIndividualsWithError(t *testing.T) {
 			t.Error("Individual shouldn't have Evaluated set to true")
 		}
 	}
-	if indis.Evaluate(false) == nil {
+	if indis.Evaluate(false, 0) == nil {
 		t.Error("An error should have been raised")
 	}
 	for _, indi := range indis {
@@ -110,7 +110,7 @@ func TestEvaluateIndividualsParallel(t *testing.T) {
 			t.Error("Individual shouldn't have Evaluated set to True")
 		}
 	}
-	indis.Evaluate(true)
+	indis.Evaluate(true, 0)
 	for _, indi := range indis {
 		if !indi.Evaluated {
 			t.Error("Individual should have Evaluated set to True")
@@ -123,7 +123,7 @@ func TestMutateIndividuals(t *testing.T) {
 		rng   = newRand()
 		indis = newIndividuals(10, false, NewVector, rng)
 	)
-	indis.Evaluate(false)
+	indis.Evaluate(false, 0)
 	indis.Mutate(1, rng)
 	for _, indi := range indis {
 		if indi.Evaluated {

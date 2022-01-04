@@ -10,7 +10,7 @@ import (
 // subpopulation shares the same random number generator inherited from the
 // initial population.
 type Speciator interface {
-	Apply(indis Individuals, rng *rand.Rand) ([]Individuals, error)
+	Apply(indis Individuals, rng *rand.Rand, populationIndex int) ([]Individuals, error)
 	Validate() error
 }
 
@@ -23,7 +23,7 @@ type SpecKMedoids struct {
 }
 
 // Apply SpecKMedoids.
-func (spec SpecKMedoids) Apply(indis Individuals, rng *rand.Rand) ([]Individuals, error) {
+func (spec SpecKMedoids) Apply(indis Individuals, rng *rand.Rand, populationIndex int) ([]Individuals, error) {
 	// Check there are at least K Individuals
 	if len(indis) < int(spec.K) {
 		return nil, fmt.Errorf("SpecKMedoids: have %d individuals and need at least %d",
@@ -113,7 +113,7 @@ type SpecFitnessInterval struct {
 }
 
 // Apply SpecFitnessInterval.
-func (spec SpecFitnessInterval) Apply(indis Individuals, rng *rand.Rand) ([]Individuals, error) {
+func (spec SpecFitnessInterval) Apply(indis Individuals, rng *rand.Rand, populationIndex int) ([]Individuals, error) {
 	// Check there are at least K Individuals
 	if len(indis) < int(spec.K) {
 		return nil, fmt.Errorf("specFitnessInterval: have %d individuals and need at least %d",

@@ -29,7 +29,7 @@ func TestSelectionSize(t *testing.T) {
 	)
 	for _, selector := range selectors {
 		for _, n := range []uint{3, 10, 20} {
-			var selected, _, _ = selector.Apply(n, indis, rng)
+			var selected, _, _ = selector.Apply(n, indis, rng, 0)
 			if len(selected) != int(n) {
 				t.Error("Selector didn't select the expected number of individuals")
 			}
@@ -52,7 +52,7 @@ func TestSelectionUniqueness(t *testing.T) {
 	)
 	for _, selector := range selectors {
 		for i := 0; i < numIterations; i++ {
-			var selected, _, _ = selector.Apply(2, indis, rng)
+			var selected, _, _ = selector.Apply(2, indis, rng, 0)
 			var unique = false
 			var first = selected[0].Genome.(Vector)
 			var second = selected[1].Genome.(Vector)
@@ -78,9 +78,9 @@ func TestSelElitism(t *testing.T) {
 		indis    = newIndividuals(30, false, NewVector, rng)
 		selector = SelElitism{}
 	)
-	indis.Evaluate(false)
+	indis.Evaluate(false, 0)
 	for _, n := range []uint{1, 2, 10, 30} {
-		var _, indexes, _ = selector.Apply(n, indis, rng)
+		var _, indexes, _ = selector.Apply(n, indis, rng, 0)
 		for i, index := range indexes {
 			if index != i {
 				t.Error("SelElitism didn't select the expected individuals")
@@ -94,8 +94,8 @@ func TestSelTournament(t *testing.T) {
 		rng   = newRand()
 		indis = newIndividuals(30, false, NewVector, rng)
 	)
-	indis.Evaluate(false)
-	var selected, _, _ = SelTournament{uint(len(indis))}.Apply(1, indis, rng)
+	indis.Evaluate(false, 0)
+	var selected, _, _ = SelTournament{uint(len(indis))}.Apply(1, indis, rng, 0)
 	if selected[0].Fitness != indis.FitMin() {
 		t.Error("Full SelTournament didn't select the best individual")
 	}
@@ -127,9 +127,9 @@ func TestSelRoulette(t *testing.T) {
 		indis = newIndividuals(30, false, NewVector, rng)
 		sel   = SelRoulette{}
 	)
-	indis.Evaluate(false)
+	indis.Evaluate(false, 0)
 	for _, n := range []uint{0, 1, 10, 30} {
-		var selected, _, _ = sel.Apply(n, indis, rng)
+		var selected, _, _ = sel.Apply(n, indis, rng, 0)
 		if len(selected) != int(n) {
 			t.Error("SelRoulette didn't select the right number of individuals")
 		}

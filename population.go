@@ -48,12 +48,12 @@ func (pop Population) Log(logger *log.Logger) {
 type Populations []Population
 
 // Apply a function to a slice of Populations.
-func (pops Populations) Apply(f func(pop *Population) error) error {
+func (pops Populations) Apply(f func(pop *Population, populationIndex int) error) error {
 	var g errgroup.Group
 	for i := range pops {
 		i := i // https://golang.org/doc/faq#closures_and_goroutines
 		g.Go(func() error {
-			return f(&pops[i])
+			return f(&pops[i], i)
 		})
 	}
 	return g.Wait()

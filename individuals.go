@@ -42,7 +42,7 @@ func newIndividuals(n uint, parallel bool, newGenome func(rng *rand.Rand) Genome
 		}
 		return indis
 	}
-	
+
 	var (
 		nWorkers  = uint(runtime.GOMAXPROCS(-1))
 		chunkSize = (n + nWorkers - 1) / nWorkers
@@ -66,11 +66,11 @@ func newIndividuals(n uint, parallel bool, newGenome func(rng *rand.Rand) Genome
 }
 
 // Evaluate each Individual in a slice.
-func (indis Individuals) Evaluate(parallel bool) error {
+func (indis Individuals) Evaluate(parallel bool, populationIndex int) error {
 	if !parallel {
 		var err error
 		for i := range indis {
-			err = indis[i].Evaluate()
+			err = indis[i].Evaluate(populationIndex)
 			if err != nil {
 				return err
 			}
@@ -89,7 +89,7 @@ func (indis Individuals) Evaluate(parallel bool) error {
 		a := a // https://golang.org/doc/faq#closures_and_goroutines
 		var b = minInt(a+chunkSize, n)
 		g.Go(func() error {
-			return indis[a:b].Evaluate(false)
+			return indis[a:b].Evaluate(false, populationIndex)
 		})
 	}
 

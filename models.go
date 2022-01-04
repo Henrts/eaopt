@@ -16,14 +16,14 @@ var (
 // repeated until n offsprings have been generated. If n is uneven then the
 // second offspring of the last crossover is discarded.
 func generateOffsprings(n uint, indis Individuals, sel Selector, crossRate float64,
-	rng *rand.Rand) (Individuals, error) {
+	rng *rand.Rand, populationIndex int) (Individuals, error) {
 	var (
 		offsprings = make(Individuals, n)
 		i          = 0
 	)
 	for i < len(offsprings) {
 		// Select 2 parents
-		var selected, _, err = sel.Apply(2, indis, rng)
+		var selected, _, err = sel.Apply(2, indis, rng, populationIndex)
 		if err != nil {
 			return nil, err
 		}
@@ -47,7 +47,7 @@ func generateOffsprings(n uint, indis Individuals, sel Selector, crossRate float
 // population at generation i in order for it obtain better individuals at
 // generation i+1.
 type Model interface {
-	Apply(pop *Population) error
+	Apply(pop *Population, populationIndex int) error
 	Validate() error
 }
 
@@ -59,7 +59,7 @@ type ModGenerational struct {
 }
 
 // Apply ModGenerational.
-func (mod ModGenerational) Apply(pop *Population) error {
+func (mod ModGenerational) Apply(pop *Population, populationIndex int) error {
 	// Generate as many offsprings as there are of individuals in the current population
 	var offsprings, err = generateOffsprings(
 		uint(len(pop.Individuals)),
@@ -67,6 +67,7 @@ func (mod ModGenerational) Apply(pop *Population) error {
 		mod.Selector,
 		mod.CrossRate,
 		pop.RNG,
+		populationIndex,
 	)
 	if err != nil {
 		return err
@@ -111,8 +112,8 @@ type ModSteadyState struct {
 }
 
 // Apply ModSteadyState.
-func (mod ModSteadyState) Apply(pop *Population) error {
-	var selected, indexes, err = mod.Selector.Apply(2, pop.Individuals, pop.RNG)
+func (mod ModSteadyState) Apply(pop *Population, populationIndex int) error {
+	var selected, indexes, err = mod.Selector.Apply(2, pop.Individuals, pop.RNG, populationIndex)
 	if err != nil {
 		return err
 	}
@@ -131,11 +132,11 @@ func (mod ModSteadyState) Apply(pop *Population) error {
 	}
 	if mod.KeepBest {
 		// Replace the chosen individuals with the best individuals
-		err = offsprings[0].Evaluate()
+		err = offsprings[0].Evaluate(0)
 		if err != nil {
 			return err
 		}
-		err = offsprings[1].Evaluate()
+		err = offsprings[1].Evaluate(0)
 		if err != nil {
 			return err
 		}
@@ -183,13 +184,14 @@ type ModDownToSize struct {
 }
 
 // Apply ModDownToSize.
-func (mod ModDownToSize) Apply(pop *Population) error {
+func (mod ModDownToSize) Apply(pop *Population, populationIndex int) error {
 	var offsprings, err = generateOffsprings(
 		mod.NOffsprings,
 		pop.Individuals,
 		mod.SelectorA,
 		mod.CrossRate,
 		pop.RNG,
+		populationIndex,
 	)
 	if err != nil {
 		return err
@@ -198,14 +200,14 @@ func (mod ModDownToSize) Apply(pop *Population) error {
 	if mod.MutRate > 0 {
 		offsprings.Mutate(mod.MutRate, pop.RNG)
 	}
-	err = offsprings.Evaluate(false)
+	err = offsprings.Evaluate(false, 0)
 	if err != nil {
 		return err
 	}
 	// Merge the current population with the offsprings
 	offsprings = append(offsprings, pop.Individuals...)
 	// Select down to size
-	var selected, _, _ = mod.SelectorB.Apply(uint(len(pop.Individuals)), offsprings, pop.RNG)
+	var selected, _, _ = mod.SelectorB.Apply(uint(len(pop.Individuals)), offsprings, pop.RNG, populationIndex)
 	// Replace the current population of individuals
 	copy(pop.Individuals, selected)
 	return nil
@@ -249,7 +251,7 @@ type ModRing struct {
 }
 
 // Apply ModRing.
-func (mod ModRing) Apply(pop *Population) error {
+func (mod ModRing) Apply(pop *Population, populationIndex int) error {
 	for i := range pop.Individuals {
 		var (
 			indi      = pop.Individuals[i].Clone(pop.RNG)
@@ -265,18 +267,18 @@ func (mod ModRing) Apply(pop *Population) error {
 				neighbour.Mutate(pop.RNG)
 			}
 		}
-		err := indi.Evaluate()
+		err := indi.Evaluate(0)
 		if err != nil {
 			return err
 		}
-		err = neighbour.Evaluate()
+		err = neighbour.Evaluate(0)
 		if err != nil {
 			return err
 		}
 		// Select an individual out of the original individual and the
 		// offsprings
 		indis := Individuals{pop.Individuals[i], indi, neighbour}
-		selected, _, err := mod.Selector.Apply(1, indis, pop.RNG)
+		selected, _, err := mod.Selector.Apply(1, indis, pop.RNG, populationIndex)
 		if err != nil {
 			return err
 		}
@@ -311,11 +313,11 @@ type ModMutationOnly struct {
 }
 
 // Apply ModMutationOnly.
-func (mod ModMutationOnly) Apply(pop *Population) error {
+func (mod ModMutationOnly) Apply(pop *Population, populationIndex int) error {
 	for i, indi := range pop.Individuals {
 		var mutant = indi.Clone(pop.RNG)
 		mutant.Mutate(pop.RNG)
-		err := mutant.Evaluate()
+		err := mutant.Evaluate(0)
 		if err != nil {
 			return err
 		}
